@@ -15,3 +15,19 @@ export async function GET(_req: Request, { params }: Params) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
+
+export async function DELETE(req: Request, { params }: Params) {
+  const { id } = await params
+  const { ids } = await req.json()
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return NextResponse.json({ error: 'ids array is required' }, { status: 400 })
+  }
+  const db = createAdminClient()
+  const { error } = await db
+    .from('content_items')
+    .delete()
+    .in('id', ids)
+    .eq('project_id', id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}

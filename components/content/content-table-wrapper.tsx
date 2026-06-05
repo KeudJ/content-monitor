@@ -4,7 +4,7 @@ import { useState } from 'react'
 import ContentTable from './content-table'
 import ContentFilters from './content-filters'
 import { Button } from '@/components/ui/button'
-import { RefreshCw, Download } from 'lucide-react'
+import { RefreshCw, Download, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ContentItem } from '@/lib/types'
 import { format } from 'date-fns'
@@ -17,9 +17,44 @@ interface Props {
 export default function ContentTableWrapper({ projectId, initialItems }: Props) {
   const [items, setItems] = useState<ContentItem[]>(initialItems)
   const [syncing, setSyncing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [dateRange, setDateRange] = useState<'all' | '7d' | '30d'>('all')
   const [showNewOnly, setShowNewOnly] = useState(false)
+
+  function handleToggle(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function handleToggleAll(checked: boolean) {
+    setSelectedIds(checked ? new Set(filteredItems.map(i => i.id)) : new Set())
+  }
+
+  async function handleDelete() {
+    if (selectedIds.size === 0) return
+    if (!confirm(`선택한 ${selectedIds.size}개 항목을 삭제할까요?`)) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/projects/${projectId}/content`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      })
+      if (!res.ok) throw new Error('삭제 실패')
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)))
+      setSelectedIds(new Set())
+      toast(`${selectedIds.size}개 항목이 삭제되었습니다.`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '삭제 실패')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   async function handleSync() {
     setSyncing(true)
@@ -28,11 +63,11 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       toast(`Synced: ${data.added} new items added.`)
-      // Refresh items
       const refreshRes = await fetch(`/api/projects/${projectId}/content`)
       if (refreshRes.ok) {
         const fresh = await refreshRes.json()
         setItems(fresh)
+        setSelectedIds(new Set())
       } else {
         window.location.reload()
       }
@@ -67,9 +102,7 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
 
   function getFilteredItems(): ContentItem[] {
     let result = items
-
     if (showNewOnly) result = result.filter(i => i.is_new)
-
     if (dateRange !== 'all') {
       const cutoff = new Date()
       cutoff.setDate(cutoff.getDate() - (dateRange === '7d' ? 7 : 30))
@@ -78,7 +111,6 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
         return date && new Date(date) >= cutoff
       })
     }
-
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter(
@@ -89,7 +121,6 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
           i.domain?.toLowerCase().includes(q)
       )
     }
-
     return result
   }
 
@@ -107,6 +138,17 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
           onShowNewOnlyChange={setShowNewOnly}
         />
         <div className="ml-auto flex gap-2">
+          {selectedIds.size > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              {deleting ? '삭제 중...' : `Delete (${selectedIds.size})`}
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={exportCsv} disabled={filteredItems.length === 0}>
             <Download className="h-4 w-4 mr-1.5" />
             CSV
@@ -117,9 +159,15 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
           </Button>
         </div>
       </div>
-      <ContentTable items={filteredItems} />
+      <ContentTable
+        items={filteredItems}
+        selectedIds={selectedIds}
+        onToggle={handleToggle}
+        onToggleAll={handleToggleAll}
+      />
       <p className="text-xs text-muted-foreground">
         {filteredItems.length} of {items.length} items
+        {selectedIds.size > 0 && ` · ${selectedIds.size}개 선택됨`}
       </p>
     </div>
   )
