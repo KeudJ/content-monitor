@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/server'
 import ContentTableWrapper from '@/components/content/content-table-wrapper'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
@@ -14,8 +14,9 @@ interface Props {
 
 export default async function ProjectPage({ params }: Props) {
   const { id } = await params
+  const db = createAdminClient()
 
-  const { data: project } = await supabase
+  const { data: project } = await db
     .from('projects')
     .select('*')
     .eq('id', id)
@@ -23,7 +24,7 @@ export default async function ProjectPage({ params }: Props) {
 
   if (!project) notFound()
 
-  const { data: items } = await supabase
+  const { data: items } = await db
     .from('content_items')
     .select('*')
     .eq('project_id', id)

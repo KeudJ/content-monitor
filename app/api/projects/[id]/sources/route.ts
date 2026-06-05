@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -9,7 +9,8 @@ export async function POST(req: Request, { params }: Params) {
   if (!url?.trim() || !['rss', 'blog'].includes(type)) {
     return NextResponse.json({ error: 'url and type (rss|blog) are required' }, { status: 400 })
   }
-  const { data, error } = await supabaseAdmin
+  const db = createAdminClient()
+  const { data, error } = await db
     .from('sources')
     .insert({ project_id: id, url: url.trim(), type })
     .select()
@@ -21,7 +22,8 @@ export async function POST(req: Request, { params }: Params) {
 export async function DELETE(req: Request, { params }: Params) {
   const { id } = await params
   const { sourceId } = await req.json()
-  const { error } = await supabaseAdmin
+  const db = createAdminClient()
+  const { error } = await db
     .from('sources')
     .delete()
     .eq('id', sourceId)

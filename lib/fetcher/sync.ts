@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { fetchRssFeed } from './rss'
 import { crawlBlog } from './crawler'
 import type { RawContentItem, Source } from '@/lib/types'
@@ -10,7 +10,8 @@ export interface SyncResult {
 }
 
 export async function syncProject(projectId: string): Promise<SyncResult> {
-  const { data: sources, error } = await supabaseAdmin
+  const db = createAdminClient()
+  const { data: sources, error } = await db
     .from('sources')
     .select('*')
     .eq('project_id', projectId)
@@ -37,7 +38,7 @@ export async function syncProject(projectId: string): Promise<SyncResult> {
     for (const item of items) {
       if (!item.url) continue
 
-      const { error: upsertErr } = await supabaseAdmin.from('content_items').upsert(
+      const { error: upsertErr } = await db.from('content_items').upsert(
         {
           project_id: projectId,
           source_id: source.id,
@@ -63,7 +64,8 @@ export async function syncProject(projectId: string): Promise<SyncResult> {
 }
 
 export async function syncAllProjects(): Promise<void> {
-  const { data: projects } = await supabaseAdmin.from('projects').select('id')
+  const db = createAdminClient()
+  const { data: projects } = await db.from('projects').select('id')
   if (!projects) return
 
   await Promise.allSettled(projects.map(p => syncProject(p.id)))

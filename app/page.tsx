@@ -1,10 +1,11 @@
-import { supabase } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/server'
 import ProjectList from '@/components/projects/project-list'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const { data: projects } = await supabase
+  const db = createAdminClient()
+  const { data: projects } = await db
     .from('projects')
     .select(`
       *,

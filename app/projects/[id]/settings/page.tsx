@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import SettingsForm from '@/components/projects/settings-form'
 
@@ -11,10 +11,11 @@ interface Props {
 
 export default async function SettingsPage({ params }: Props) {
   const { id } = await params
+  const db = createAdminClient()
 
   const [{ data: project }, { data: sources }] = await Promise.all([
-    supabase.from('projects').select('*').eq('id', id).single(),
-    supabase.from('sources').select('*').eq('project_id', id).order('created_at'),
+    db.from('projects').select('*').eq('id', id).single(),
+    db.from('sources').select('*').eq('project_id', id).order('created_at'),
   ])
 
   if (!project) notFound()
