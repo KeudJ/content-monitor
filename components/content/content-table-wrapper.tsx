@@ -62,7 +62,11 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
       const res = await fetch(`/api/projects/${projectId}/sync`, { method: 'POST' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      toast(`Synced: ${data.added} new items added.`)
+      if (data.errors?.length > 0) {
+        toast.warning(`${data.added}개 추가, ${data.errors.length}개 소스 실패: ${data.errors[0]}`)
+      } else {
+        toast(`Synced: ${data.added} new items added.`)
+      }
       const refreshRes = await fetch(`/api/projects/${projectId}/content`)
       if (refreshRes.ok) {
         const fresh = await refreshRes.json()
