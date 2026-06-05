@@ -6,7 +6,7 @@ create table if not exists projects (
 
 create table if not exists sources (
   id uuid default gen_random_uuid() primary key,
-  project_id uuid references projects(id) on delete cascade not null,
+  project_id uuid not null references projects(id) on delete cascade,
   url text not null,
   type text not null check (type in ('rss', 'blog')),
   created_at timestamptz default now(),
@@ -15,7 +15,7 @@ create table if not exists sources (
 
 create table if not exists content_items (
   id uuid default gen_random_uuid() primary key,
-  project_id uuid references projects(id) on delete cascade not null,
+  project_id uuid not null references projects(id) on delete cascade,
   source_id uuid references sources(id) on delete set null,
   title text,
   meta_description text,
