@@ -178,15 +178,18 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
               {deleting ? '삭제 중...' : `Delete (${selectedIds.size})`}
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleTranslate}
-            disabled={translating || selectedIds.size === 0}
-          >
-            <Languages className={`h-4 w-4 mr-1.5 ${translating ? 'animate-pulse' : ''}`} />
-            {translating ? '번역 중...' : '번역'}
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTranslate}
+              disabled={translating || selectedIds.size === 0}
+            >
+              <Languages className={`h-4 w-4 mr-1.5 ${translating ? 'animate-pulse' : ''}`} />
+              {translating ? '번역 중...' : '번역'}
+            </Button>
+            <span className="text-xs text-muted-foreground">비활성화</span>
+          </div>
           <Button variant="outline" size="sm" onClick={exportCsv} disabled={filteredItems.length === 0}>
             <Download className="h-4 w-4 mr-1.5" />
             CSV
