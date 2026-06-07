@@ -4,7 +4,7 @@ import { useState } from 'react'
 import ContentTable from './content-table'
 import ContentFilters from './content-filters'
 import { Button } from '@/components/ui/button'
-import { RefreshCw, Download, Trash2 } from 'lucide-react'
+import { RefreshCw, Download, Trash2, Languages } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ContentItem } from '@/lib/types'
 import { format } from 'date-fns'
@@ -18,6 +18,7 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
   const [items, setItems] = useState<ContentItem[]>(initialItems)
   const [syncing, setSyncing] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [translating, setTranslating] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [dateRange, setDateRange] = useState<'all' | '7d' | '30d'>('all')
@@ -53,6 +54,30 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
       toast.error(err instanceof Error ? err.message : '삭제 실패')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  async function handleTranslate() {
+    if (selectedIds.size === 0) return
+    setTranslating(true)
+    try {
+      const res = await fetch(`/api/projects/${projectId}/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      toast(`${data.translated}개 항목을 한국어로 번역했습니다.`)
+      const refreshRes = await fetch(`/api/projects/${projectId}/content`)
+      if (refreshRes.ok) {
+        setItems(await refreshRes.json())
+        setSelectedIds(new Set())
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '번역 실패')
+    } finally {
+      setTranslating(false)
     }
   }
 
@@ -153,6 +178,15 @@ export default function ContentTableWrapper({ projectId, initialItems }: Props) 
               {deleting ? '삭제 중...' : `Delete (${selectedIds.size})`}
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleTranslate}
+            disabled={translating || selectedIds.size === 0}
+          >
+            <Languages className={`h-4 w-4 mr-1.5 ${translating ? 'animate-pulse' : ''}`} />
+            {translating ? '번역 중...' : '번역'}
+          </Button>
           <Button variant="outline" size="sm" onClick={exportCsv} disabled={filteredItems.length === 0}>
             <Download className="h-4 w-4 mr-1.5" />
             CSV
