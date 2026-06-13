@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import ProjectTabs from '@/components/projects/project-tabs'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,7 +43,6 @@ export default async function ProjectLayout({ params, children }: Props) {
           Settings
         </Link>
       </div>
-      <ProjectTabs projectId={id} />
       {children}
     </div>
   )
