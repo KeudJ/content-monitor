@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     .order('engagement_rate', { ascending: false })
 
   const postsContext = (posts || [])
-    .map(p => `날짜:${p.published_at?.slice(0, 10)} 조회수:${p.impressions} 좋아요:${p.likes} 댓글:${p.comments} 리포스트:${p.reposts} 참여율:${(p.engagement_rate * 100).toFixed(2)}%\n${p.content || '(미디어)'}`)
+    .map(p => `날짜:${p.published_at?.slice(0, 10)} 조회수:${p.impressions} 좋아요:${p.likes} 댓글:${p.comments} 리포스트:${p.reposts} 참여율:${(p.engagement_rate * 100).toFixed(2)}%\n${p.post_text || '(미디어)'}`)
     .join('\n\n---\n\n')
 
   const response = await anthropic.messages.create({

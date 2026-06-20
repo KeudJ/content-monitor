@@ -72,7 +72,7 @@ export default function ContentCalendar({ accountId }: Props) {
                     : 'bg-blue-100 text-blue-700'
                   }`}
                 >
-                  {p.content.slice(0, 12)}...
+                  {p.post_text.slice(0, 12)}...
                 </button>
               ))}
             </div>
@@ -95,7 +95,7 @@ export default function ContentCalendar({ accountId }: Props) {
               </Button>
             </div>
           </div>
-          <p className="text-sm whitespace-pre-wrap">{selected.content}</p>
+          <p className="text-sm whitespace-pre-wrap">{selected.post_text}</p>
         </div>
       )}
     </div>

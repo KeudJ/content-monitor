@@ -14,7 +14,7 @@ create table if not exists posts (
   id uuid primary key default gen_random_uuid(),
   account_id uuid references threads_accounts(id) on delete cascade,
   threads_post_id text unique not null,
-  content text,
+  post_text text,
   media_url text,
   published_at timestamptz,
   impressions int default 0,
@@ -32,7 +32,7 @@ create table if not exists posts (
 create table if not exists scheduled_posts (
   id uuid primary key default gen_random_uuid(),
   account_id uuid references threads_accounts(id) on delete cascade,
-  content text not null,
+  post_text text not null,
   media_url text,
   scheduled_at timestamptz not null,
   status text default 'pending' check (status in ('pending', 'published', 'failed')),

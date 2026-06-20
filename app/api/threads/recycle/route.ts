@@ -10,14 +10,14 @@ export async function POST(req: NextRequest) {
 
   const { data: posts } = await db
     .from('posts')
-    .select('content, engagement_rate, likes, impressions')
+    .select('post_text, engagement_rate, likes, impressions')
     .eq('account_id', accountId)
-    .not('content', 'is', null)
+    .not('post_text', 'is', null)
     .order('engagement_rate', { ascending: false })
     .limit(10)
 
   const postsText = (posts || [])
-    .map((p, i) => `[${i + 1}] 참여율 ${(p.engagement_rate * 100).toFixed(2)}%\n${p.content}`)
+    .map((p, i) => `[${i + 1}] 참여율 ${(p.engagement_rate * 100).toFixed(2)}%\n${p.post_text}`)
     .join('\n\n---\n\n')
 
   const response = await anthropic.messages.create({

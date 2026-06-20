@@ -11,13 +11,13 @@ export async function POST(req: NextRequest) {
   const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
   const { data: posts } = await db
     .from('posts')
-    .select('content, engagement_rate, impressions, published_at')
+    .select('post_text, engagement_rate, impressions, published_at')
     .eq('account_id', accountId)
     .gte('published_at', since)
-    .not('content', 'is', null)
+    .not('post_text', 'is', null)
 
   const postsText = (posts || [])
-    .map(p => `[참여율:${(p.engagement_rate * 100).toFixed(2)}%] ${p.content}`)
+    .map(p => `[참여율:${(p.engagement_rate * 100).toFixed(2)}%] ${p.post_text}`)
     .join('\n\n')
 
   const response = await anthropic.messages.create({
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   if (!hashtagStats?.length && posts?.length) {
     const hashtagMap: Record<string, { total_er: number; count: number }> = {}
     for (const post of posts) {
-      const tags = (post.content || '').match(/#[\w가-힣]+/g) || []
+      const tags = (post.post_text || '').match(/#[\w가-힣]+/g) || []
       for (const tag of tags) {
         if (!hashtagMap[tag]) hashtagMap[tag] = { total_er: 0, count: 0 }
         hashtagMap[tag].total_er += post.engagement_rate

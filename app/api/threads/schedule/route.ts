@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await db.from('scheduled_posts').insert({
     account_id: accountId,
-    content,
+    post_text: content,
     media_url: mediaUrl || null,
     scheduled_at: scheduledAt,
     status: 'pending',

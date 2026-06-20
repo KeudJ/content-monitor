@@ -12,7 +12,7 @@ export interface Post {
   id: string
   account_id: string
   threads_post_id: string
-  content: string | null
+  post_text: string | null
   media_url: string | null
   published_at: string | null
   impressions: number
@@ -29,7 +29,7 @@ export interface Post {
 export interface ScheduledPost {
   id: string
   account_id: string
-  content: string
+  post_text: string
   media_url: string | null
   scheduled_at: string
   status: 'pending' | 'published' | 'failed'

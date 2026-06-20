@@ -19,7 +19,7 @@ export default function TopPosts({ posts }: Props) {
         <div key={p.id} className="flex gap-3 p-3 border rounded-lg">
           <span className="text-muted-foreground text-sm font-medium w-5 shrink-0">#{i + 1}</span>
           <div className="flex-1 min-w-0">
-            <p className="text-sm line-clamp-2">{p.content || '(미디어 게시물)'}</p>
+            <p className="text-sm line-clamp-2">{p.post_text || '(미디어 게시물)'}</p>
             <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
               <span>조회수 {p.impressions.toLocaleString()}</span>
               <span>좋아요 {p.likes}</span>

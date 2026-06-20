@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     await db.from('posts').upsert({
       account_id: accountId,
       threads_post_id: post.id,
-      content: post.text || null,
+      post_text: post.text || null,
       media_url: post.media_url || null,
       published_at: post.timestamp || null,
       impressions,

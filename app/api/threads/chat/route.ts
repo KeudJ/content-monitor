@@ -10,13 +10,13 @@ export async function POST(req: NextRequest) {
 
   const { data: posts } = await db
     .from('posts')
-    .select('content, published_at, impressions, likes, comments, reposts, quotes, engagement_rate')
+    .select('post_text, published_at, impressions, likes, comments, reposts, quotes, engagement_rate')
     .eq('account_id', accountId)
     .order('published_at', { ascending: false })
     .limit(30)
 
   const postsContext = (posts || [])
-    .map(p => `[${p.published_at?.slice(0, 10)}] 조회수:${p.impressions} 좋아요:${p.likes} 참여율:${(p.engagement_rate * 100).toFixed(2)}%\n${p.content || '(미디어 게시물)'}`)
+    .map(p => `[${p.published_at?.slice(0, 10)}] 조회수:${p.impressions} 좋아요:${p.likes} 참여율:${(p.engagement_rate * 100).toFixed(2)}%\n${p.post_text || '(미디어 게시물)'}`)
     .join('\n\n---\n\n')
 
   const systemPrompt = `당신은 Threads SNS 콘텐츠 전략 전문가입니다.
