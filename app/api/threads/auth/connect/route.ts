@@ -5,13 +5,7 @@ export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!
   const redirectUri = `${appUrl}/api/threads/auth/callback`
 
-  const scopes = [
-    'threads_basic',
-    'threads_content_publish',
-    'threads_read_engagement',
-    'threads_manage_insights',
-    'threads_manage_replies',
-  ].join(',')
+  const scopes = ['threads_basic'].join(',')
 
   const url = new URL('https://threads.net/oauth/authorize')
   url.searchParams.set('client_id', appId)
