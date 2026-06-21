@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { qwenChat } from '@/lib/qwen'
 import * as cheerio from 'cheerio'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const GUIDELINES = `Threads 게시물 가이드라인:
 - 500자 이내
@@ -52,13 +50,7 @@ export async function POST(req: NextRequest) {
     prompt = `다음 자료를 바탕으로 Threads 게시물 3개 버전을 작성해주세요.${profileContext}${instructionsContext}\n\n자료:\n${sourceContent}\n\n${GUIDELINES}\n\n3가지 버전을 "---"로 구분해주세요.`
   }
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const full = response.content[0].type === 'text' ? response.content[0].text : ''
+  const full = await qwenChat([{ role: 'user', content: prompt }], 1024)
   const versions = full.split(/\n?---\n?/).map(v => v.trim()).filter(Boolean)
 
   return NextResponse.json({ versions })

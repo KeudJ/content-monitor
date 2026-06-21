@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { qwenChat } from '@/lib/qwen'
 import { createAdminClient } from '@/lib/supabase/server'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(req: NextRequest) {
   const { accountId } = await req.json()
@@ -20,12 +18,9 @@ export async function POST(req: NextRequest) {
     .map(p => `[참여율:${(p.engagement_rate * 100).toFixed(2)}%] ${p.post_text}`)
     .join('\n\n')
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
-    messages: [{
-      role: 'user',
-      content: `다음은 최근 90일간 Threads 게시물입니다:\n\n${postsText}\n\n아래 두 가지를 JSON으로 답변해주세요:
+  const text = await qwenChat([{
+    role: 'user',
+    content: `다음은 최근 90일간 Threads 게시물입니다:\n\n${postsText}\n\n아래 두 가지를 JSON으로 답변해주세요:
 {
   "hashtag_analysis": "해시태그별 사용 빈도와 평균 참여율 설명",
   "keyword_clusters": [
@@ -33,10 +28,7 @@ export async function POST(req: NextRequest) {
     ...
   ]
 }`,
-    }],
-  })
-
-  const text = response.content[0].type === 'text' ? response.content[0].text : '{}'
+  }], 2048)
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   const result = jsonMatch ? JSON.parse(jsonMatch[0]) : {}
 

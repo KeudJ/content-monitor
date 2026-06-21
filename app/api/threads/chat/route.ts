@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { qwenChat } from '@/lib/qwen'
 import { createAdminClient } from '@/lib/supabase/server'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(req: NextRequest) {
   const { accountId, messages } = await req.json()
@@ -26,12 +24,10 @@ ${postsContext}
 
 이 데이터를 바탕으로 사용자의 질문에 답변해주세요. 구체적인 수치와 인사이트를 제공하세요.`
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages,
-  })
+  const content = await qwenChat([
+    { role: 'system', content: systemPrompt },
+    ...messages,
+  ])
 
-  return NextResponse.json({ content: response.content[0].type === 'text' ? response.content[0].text : '' })
+  return NextResponse.json({ content })
 }
