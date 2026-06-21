@@ -20,14 +20,18 @@ export async function POST(req: NextRequest) {
   const threadsList = threadsData.data || []
 
   let synced = 0
+  let insightsError: unknown = null
   for (const post of threadsList) {
     const insights = await getPostInsights(account.access_token, post.id)
+    if (!insights && !insightsError) insightsError = `insights null for post ${post.id}`
     const metrics: Record<string, number> = {}
 
     if (insights?.data) {
       for (const m of insights.data) {
         metrics[m.name] = m.values?.[0]?.value ?? m.total_value?.value ?? 0
       }
+    } else if (insights?.error) {
+      insightsError = insights.error
     }
 
     const likes = metrics['likes'] ?? 0
@@ -59,5 +63,5 @@ export async function POST(req: NextRequest) {
     synced++
   }
 
-  return NextResponse.json({ synced })
+  return NextResponse.json({ synced, insightsError })
 }

@@ -16,7 +16,6 @@ export async function getThreadsList(token: string, userId: string) {
 export async function getPostInsights(token: string, postId: string) {
   const metrics = 'views,likes,replies,reposts,quotes,profile_clicks'
   const r = await fetch(`${BASE}/${postId}/insights?metric=${metrics}&access_token=${token}`)
-  if (!r.ok) return null
   return r.json()
 }
 
