@@ -80,15 +80,15 @@ function Dashboard() {
             <EngagementChart posts={posts} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="border rounded-lg p-4">
-              <h2 className="text-sm font-medium mb-3">최고 성과 게시물</h2>
-              <TopPosts posts={posts} />
-            </div>
-            <div className="border rounded-lg p-4">
-              <h2 className="text-sm font-medium mb-3">AI 어시스턴트</h2>
-              <Chatbot accountId={accountId} />
-            </div>
+          <div className="border rounded-lg p-4">
+            <h2 className="text-sm font-medium mb-3">성과 게시물</h2>
+            <TopPosts posts={posts} />
+          </div>
+
+          <div className="border rounded-lg p-4">
+            <h2 className="text-sm font-medium mb-3">AI 콘텐츠 어시스턴트</h2>
+            <p className="text-xs text-muted-foreground mb-3">내 콘텐츠 데이터를 기반으로 질문하거나 콘텐츠 아이디어를 요청해보세요.</p>
+            <Chatbot accountId={accountId} />
           </div>
 
           <div className="border rounded-lg p-4">
