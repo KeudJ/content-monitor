@@ -1,17 +1,23 @@
 import OpenAI from 'openai'
 
-export const qwen = new OpenAI({
-  apiKey: process.env.QWEN_API_KEY!,
-  baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-})
+const QWEN_MODEL = 'qwen-plus'
 
-export const QWEN_MODEL = 'qwen-plus'
+let _client: OpenAI | null = null
+function getClient() {
+  if (!_client) {
+    _client = new OpenAI({
+      apiKey: process.env.QWEN_API_KEY!,
+      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    })
+  }
+  return _client
+}
 
 export async function qwenChat(
   messages: OpenAI.Chat.ChatCompletionMessageParam[],
   maxTokens = 1024
 ): Promise<string> {
-  const res = await qwen.chat.completions.create({
+  const res = await getClient().chat.completions.create({
     model: QWEN_MODEL,
     messages,
     max_tokens: maxTokens,
