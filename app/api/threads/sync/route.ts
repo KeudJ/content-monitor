@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { getThreadsList, getPostInsights } from '@/lib/threads/api'
+import { getThreadsList, getPostInsights, getUserFollowersCount } from '@/lib/threads/api'
 
 export async function POST(req: NextRequest) {
   const { accountId } = await req.json()
@@ -18,6 +18,8 @@ export async function POST(req: NextRequest) {
 
   const threadsData = await getThreadsList(account.access_token, account.threads_user_id)
   const threadsList = threadsData.data || []
+
+  const followersCount = await getUserFollowersCount(account.access_token, account.threads_user_id)
 
   let synced = 0
   let insightsError: unknown = null
@@ -56,6 +58,7 @@ export async function POST(req: NextRequest) {
       reposts,
       quotes,
       profile_clicks: profileClicks,
+      followers_count: followersCount,
       engagement_rate: engagementRate,
       synced_at: new Date().toISOString(),
     }, { onConflict: 'threads_post_id' })

@@ -19,6 +19,14 @@ export async function getPostInsights(token: string, postId: string) {
   return r.json()
 }
 
+export async function getUserFollowersCount(token: string, userId: string) {
+  const r = await fetch(`${BASE}/${userId}/threads_insights?metric=followers_count&period=day&access_token=${token}`)
+  const data = await r.json()
+  if (data?.error) return 0
+  const item = data?.data?.find((d: { name: string }) => d.name === 'followers_count')
+  return item?.total_value?.value ?? item?.values?.[0]?.value ?? 0
+}
+
 export async function createThreadsDraft(token: string, userId: string, text: string, mediaUrl?: string) {
   const body = new URLSearchParams({ access_token: token, text })
   if (mediaUrl) {
