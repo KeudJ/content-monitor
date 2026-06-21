@@ -22,11 +22,14 @@ export async function GET(req: NextRequest) {
     }),
   })
 
-  if (!tokenRes.ok) {
-    return NextResponse.redirect(`${appUrl}/threads/dashboard?error=token_exchange`)
+  const tokenData = await tokenRes.json()
+
+  if (!tokenRes.ok || tokenData.error_code || tokenData.error_message) {
+    const msg = encodeURIComponent(tokenData.error_message || tokenData.error_type || 'token_exchange')
+    return NextResponse.redirect(`${appUrl}/threads/dashboard?error=${msg}`)
   }
 
-  const { access_token, user_id } = await tokenRes.json()
+  const { access_token, user_id } = tokenData
 
   // Exchange for long-lived token (60 days)
   const longLivedRes = await fetch(
