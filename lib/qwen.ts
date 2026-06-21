@@ -7,7 +7,7 @@ function getClient() {
   if (!_client) {
     _client = new OpenAI({
       apiKey: process.env.QWEN_API_KEY!,
-      baseURL: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
+      baseURL: 'https://ws-04rcd75avr80o89y.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1',
     })
   }
   return _client
