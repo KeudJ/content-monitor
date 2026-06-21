@@ -8,7 +8,8 @@ export async function GET() {
   const scopes = [
     'threads_basic',
     'threads_content_publish',
-    'threads_manage_mentions',
+    'threads_manage_insights',
+    'threads_manage_replies',
     'threads_read_replies',
   ].join(',')
 
