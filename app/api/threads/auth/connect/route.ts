@@ -7,10 +7,8 @@ export async function GET() {
 
   const scopes = [
     'threads_basic',
-    'threads_content_publish',
     'threads_read_engagement',
     'threads_manage_insights',
-    'threads_manage_replies',
   ].join(',')
 
   const url = new URL('https://threads.net/oauth/authorize')
