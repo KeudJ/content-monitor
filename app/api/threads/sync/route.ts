@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     const reposts = metrics['reposts'] ?? 0
     const quotes = metrics['quotes'] ?? 0
     const impressions = metrics['views'] ?? 0
-    const profileClicks = metrics['profile_clicks'] ?? 0
+    const profileClicks = metrics['clicks'] ?? 0
     const engagementRate = impressions > 0
       ? (likes + comments + reposts + quotes) / impressions
       : 0
