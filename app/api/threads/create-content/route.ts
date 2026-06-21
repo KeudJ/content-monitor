@@ -13,7 +13,7 @@ const GUIDELINES = `Threads 게시물 가이드라인:
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { mode, url, topic, tone, text } = body
+  const { mode, url, topic, tone, text, instructions, accountProfile } = body
 
   let sourceContent = ''
 
@@ -27,6 +27,19 @@ export async function POST(req: NextRequest) {
     sourceContent = text.slice(0, 3000)
   }
 
+  // Build account profile context
+  const profileParts: string[] = []
+  if (accountProfile?.tone_manner) profileParts.push(`톤앤매너: ${accountProfile.tone_manner}`)
+  if (accountProfile?.concept) profileParts.push(`컨셉: ${accountProfile.concept}`)
+  if (accountProfile?.target_audience) profileParts.push(`타겟 오디언스: ${accountProfile.target_audience}`)
+  const profileContext = profileParts.length
+    ? `\n\n계정 프로필:\n${profileParts.join('\n')}`
+    : ''
+
+  const instructionsContext = instructions
+    ? `\n\n추가 지시사항: ${instructions}`
+    : ''
+
   let prompt = ''
   if (mode === 'free') {
     const toneMap: Record<string, string> = {
@@ -34,9 +47,9 @@ export async function POST(req: NextRequest) {
       friendly: '친근하고 대화하듯 편안한',
       provocative: '도발적이고 강렬한',
     }
-    prompt = `주제: "${topic}"\n톤: ${toneMap[tone] || '자연스러운'}\n\n위 주제로 ${GUIDELINES}\n\n3가지 버전의 Threads 게시물을 작성해주세요. 각 버전을 "---"로 구분해주세요.`
+    prompt = `주제: "${topic}"\n톤: ${toneMap[tone] || '자연스러운'}${profileContext}${instructionsContext}\n\n위 주제로 ${GUIDELINES}\n\n3가지 버전의 Threads 게시물을 작성해주세요. 각 버전을 "---"로 구분해주세요.`
   } else {
-    prompt = `다음 자료를 바탕으로 Threads 게시물 3개 버전을 작성해주세요.\n\n자료:\n${sourceContent}\n\n${GUIDELINES}\n\n3가지 버전을 "---"로 구분해주세요.`
+    prompt = `다음 자료를 바탕으로 Threads 게시물 3개 버전을 작성해주세요.${profileContext}${instructionsContext}\n\n자료:\n${sourceContent}\n\n${GUIDELINES}\n\n3가지 버전을 "---"로 구분해주세요.`
   }
 
   const response = await anthropic.messages.create({

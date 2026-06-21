@@ -7,19 +7,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Upload } from 'lucide-react'
+import type { ThreadsAccount } from '@/lib/types/threads'
 
 interface Props {
   initialContent?: string
+  accountProfile?: Pick<ThreadsAccount, 'tone_manner' | 'concept' | 'target_audience'> | null
 }
 
 const TABS = ['자료 업로드', 'URL 기반', 'AI 자유 생성'] as const
 type Tab = typeof TABS[number]
 
-export default function ContentCreator({ initialContent = '' }: Props) {
+export default function ContentCreator({ initialContent = '', accountProfile }: Props) {
   const [tab, setTab] = useState<Tab>('AI 자유 생성')
   const [generating, setGenerating] = useState(false)
   const [versions, setVersions] = useState<string[]>([])
   const [selected, setSelected] = useState(initialContent)
+  const [instructions, setInstructions] = useState('')
 
   // Tab states
   const [fileText, setFileText] = useState('')
@@ -37,10 +40,11 @@ export default function ContentCreator({ initialContent = '' }: Props) {
 
   async function generate() {
     setGenerating(true)
+    const base = { instructions: instructions || undefined, accountProfile: accountProfile || undefined }
     const body =
-      tab === '자료 업로드' ? { mode: 'text', text: fileText }
-      : tab === 'URL 기반' ? { mode: 'url', url }
-      : { mode: 'free', topic, tone }
+      tab === '자료 업로드' ? { mode: 'text', text: fileText, ...base }
+      : tab === 'URL 기반' ? { mode: 'url', url, ...base }
+      : { mode: 'free', topic, tone, ...base }
 
     const res = await fetch('/api/threads/create-content', {
       method: 'POST',
@@ -109,6 +113,16 @@ export default function ContentCreator({ initialContent = '' }: Props) {
           </div>
         </div>
       )}
+
+      <div className="space-y-1">
+        <Label className="text-sm">생성 방향 지시 <span className="text-muted-foreground font-normal">(선택)</span></Label>
+        <Textarea
+          value={instructions}
+          onChange={e => setInstructions(e.target.value)}
+          placeholder="예: 질문형 문장으로 시작해줘 / 숫자 리스트 형태로 / 최신 AI 트렌드를 언급해줘"
+          className="h-20 text-sm resize-none"
+        />
+      </div>
 
       <Button onClick={generate} disabled={generating} className="w-full">
         {generating ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}

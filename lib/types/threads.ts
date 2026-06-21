@@ -5,6 +5,9 @@ export interface ThreadsAccount {
   access_token: string
   token_expires_at: string | null
   profile_picture_url: string | null
+  tone_manner: string | null
+  concept: string | null
+  target_audience: string | null
   created_at: string
 }
 
